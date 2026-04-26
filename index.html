@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusAI | The AI That Works While You Sleep</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0A0A0F;
+            --surface: #12121A;
+            --surface-accent: #1A1A24;
+            --primary: #6C63FF;
+            --secondary: #00D4FF;
+            --gradient: linear-gradient(135deg, #6C63FF, #00D4FF);
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0A8;
+            --success: #22C55E;
+            --error: #EF4444;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --radius-lg: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Utilities */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .gradient-text {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+            animation: pulse-sm 1.5s infinite;
+        }
+
+        @keyframes pulse-sm {
+            0% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(108, 99, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
+        }
+
+        /* Announcement Bar */
+        .announcement-bar {
+            background: rgba(108, 99, 255, 0.1);
+            color: var(--secondary);
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+            position: relative;
+            z-index: 1001;
+        }
+
+        /* Navbar */
+        nav {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        nav.scrolled {
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            color: white;
+        }
+
+        .mobile-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        /* Floating CTA Mobile */
+        .floating-cta {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            right: 1.5rem;
+            z-index: 999;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-toggle { display: block; }
+            .floating-cta { display: block; }
+            
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: var(--bg);
+                padding: 2rem;
+                gap: 1.5rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                animation: slideDown 0.3s ease forwards;
+            }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0;
+            position: relative;
+            background-image: radial-gradient(#1a1a1f 1px, transparent 1px);
+            background-size: 24px 24px;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        @media (max-width: 992px) {
+            .hero-content { grid-template-columns: 1fr; text-align: center; }
+            .hero-btns { justify-content: center; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            line-height: 1.1;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+
+        /* CSS Animation Illustration */
+        .dashboard-mockup {
+            width: 100%;
+            height: 400px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
+
+        .mock-nav { height: 40px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; padding: 0 1rem; gap: 0.5rem; }
+        .circle { width: 8px; height: 8px; border-radius: 50%; background: #FD5D5D; }
+        .circle:nth-child(2) { background: #FDBF5E; }
+        .circle:nth-child(3) { background: #27C93F; }
+
+        .mock-sidebar { width: 60px; height: calc(100% - 40px); border-right: 1px solid rgba(255, 255, 255, 0.05); position: absolute; left: 0; top: 40px; display: flex; flex-direction: column; align-items: center; padding-top: 1rem; gap: 1rem; }
+        .mock-sidebar-icon { width: 20px; height: 2px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; }
+
+        .mock-main { margin-left: 60px; padding: 1.5rem; height: calc(100% - 40px); display: flex; flex-direction: column; gap: 1rem; }
+        .mock-chart { width: 100%; height: 120px; background: rgba(108, 99, 255, 0.05); border-radius: 8px; border: 1px solid rgba(108, 99, 255, 0.1); position: relative; overflow: hidden; }
+        .mock-chart::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: linear-gradient(0deg, var(--primary), transparent); opacity: 0.2; }
+        .mock-line { position: absolute; bottom: 30%; left: 0; width: 100%; height: 2px; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); clip-path: polygon(0 80%, 20% 40%, 40% 70%, 60% 20%, 80% 50%, 100% 10%); }
+
+        .mock-blocks { display: flex; gap: 1rem; }
+        .mock-block { flex: 1; height: 80px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; }
+
+        .social-proof { margin-top: auto; padding-top: 2rem; }
+        .social-proof p { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; opacity: 0.5; }
+        .social-logos { display: flex; gap: 3rem; align-items: center; opacity: 0.3; flex-wrap: wrap; }
+        .social-logos i { font-size: 1.5rem; }
+
+        /* Problem/Solution Section */
+        .section-padding { padding: 100px 0; }
+        .section-header { text-align: center; max-width: 700px; margin: 0 auto 4rem; }
+        .section-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -1px; }
+        .section-header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        .dual-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+        @media (max-width: 768px) { .dual-columns { grid-template-columns: 1fr; gap: 2rem; } }
+
+        .panel { padding: 2rem; border-radius: var(--radius-lg); background: var(--surface); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .panel h3 { margin-bottom: 2rem; font-size: 1.5rem; }
+        .point { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .point i { flex-shrink: 0; margin-top: 0.25rem; font-size: 1.1rem; }
+        .point .fa-xmark { color: var(--error); }
+        .point .fa-check { color: var(--success); }
+
+        /* Features Section */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .feature-card { padding: 2.5rem; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05); transition: var(--transition); position: relative; overflow: hidden; }
+        .feature-card:hover { transform: translateY(-5px); border-color: rgba(108, 99, 255, 0.3); background: var(--surface-accent); }
+        .feature-card i { font-size: 2rem; margin-bottom: 1.5rem; color: var(--primary); }
+        .feature-card h3 { margin-bottom: 1rem; font-size: 1.25rem; }
+        .feature-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* How it Works */
+        .steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; position: relative; }
+        @media (max-width: 768px) { .steps { grid-template-columns: 1fr; } }
+        .step { text-align: center; position: relative; z-index: 1; }
+        .step-number { width: 50px; height: 50px; background: var(--gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; margin: 0 auto 1.5rem; border: 4px solid var(--bg); }
+        .step h3 { margin-bottom: 0.5rem; }
+        .step p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Metrics Bar */
+        .metrics { display: flex; justify-content: space-between; padding: 4rem 2rem; background: var(--surface); border-radius: var(--radius-lg); margin-top: 4rem; flex-wrap: wrap; gap: 2rem; }
+        .metric { text-align: center; flex: 1; min-width: 150px; }
+        .metric-value { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; display: block; }
+        .metric-label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Testimonials */
+        .testimonials { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 992px) { .testimonials { grid-template-columns: 1fr; } }
+        .testimonial-card { padding: 2rem; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .reviewer { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--gradient); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .reviewer-info h4 { font-size: 1rem; margin-bottom: 0.1rem; }
+        .reviewer-info span { font-size: 0.8rem; color: var(--text-muted); }
+        .stars { color: #FDBF5E; margin-bottom: 1rem; }
+        .quote { font-size: 1rem; italic; color: #E0E0E6; }
+
+        /* Pricing */
+        .pricing-toggle { display: flex; align-items: center; justify-content: center; margin-bottom: 4rem; gap: 1rem; }
+        .toggle-btn { padding: 0.5rem 1rem; border-radius: 99px; background: var(--surface); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); cursor: pointer; transition: 0.3s; }
+        .toggle-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .pricing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; align-items: flex-start; }
+        @media (max-width: 992px) { .pricing-grid { grid-template-columns: 1fr; } }
+        
+        .price-card { padding: 3rem 2rem; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; position: relative; }
+        .price-card.featured { border: 2px solid var(--primary); transform: scale(1.05); z-index: 2; background: rgba(108, 99, 255, 0.05); }
+        .badge { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 0.25rem 1rem; border-radius: 99px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        
+        .price-header { text-align: center; margin-bottom: 2rem; }
+        .price-amount { font-size: 3.5rem; font-weight: 800; margin: 1rem 0; }
+        .price-amount span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
+        
+        .price-features { list-style: none; margin-bottom: 2.5rem; }
+        .price-features li { display: flex; gap: 0.75rem; font-size: 0.95rem; margin-bottom: 1rem; align-items: center; }
+        .price-features i { color: var(--success); }
+
+        /* FAQ */
+        .faq-list { max-width: 800px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .faq-question { padding: 1.5rem 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .faq-question h3 { font-size: 1.1rem; font-weight: 500; transition: var(--transition); }
+        .faq-question i { transition: 0.3s; opacity: 0.5; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); color: var(--text-muted); padding-bottom: 0; }
+        .faq-item.active .faq-answer { max-height: 200px; padding-bottom: 1.5rem; }
+        .faq-item.active .faq-question i { transform: rotate(180deg); }
+        .faq-item.active .faq-question h3 { color: var(--secondary); }
+
+        /* CTA Banner */
+        .cta-banner { background: var(--gradient); color: white; text-align: center; padding: 6rem 2rem; border-radius: var(--radius-lg); margin-bottom: 100px; position: relative; overflow: hidden; }
+        .cta-banner h2 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -2px; }
+        .cta-banner p { font-size: 1.25rem; margin-bottom: 2.5rem; opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .cta-banner .btn-primary { background: white; color: var(--primary); box-shadow: none; font-size: 1.2rem; padding: 1rem 2.5rem; }
+        .microcopy { display: block; margin-top: 1rem; font-size: 0.85rem; opacity: 0.7; }
+
+        /* Footer */
+        footer { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 60px; padding-bottom: 40px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4rem; margin-bottom: 60px; }
+        @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr; gap: 2rem; } }
+        .footer-logo { margin-bottom: 1.5rem; }
+        .footer-logo-text { color: var(--text-muted); max-width: 280px; }
+        .footer-col h4 { font-size: 1.1rem; margin-bottom: 1.5rem; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 0.75rem; }
+        .footer-col ul a { color: var(--text-muted); text-decoration: none; transition: 0.2s; font-size: 0.95rem; }
+        .footer-col ul a:hover { color: white; }
+        .social-links { display: flex; gap: 1.5rem; margin-top: 1.5rem; }
+        .social-links a { font-size: 1.25rem; color: var(--text-muted); transition: 0.2s; }
+        .social-links a:hover { color: var(--secondary); }
+
+        .footer-bottom { padding-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.9rem; }
+        @media (max-width: 768px) { .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; } }
+
+        /* Scroll Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Trusted Badges */
+        .trust-badges { display: flex; justify-content: center; gap: 3rem; margin-top: 3rem; opacity: 0.5; flex-wrap: wrap; }
+        .trust-badge { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Page Load Animation */
+        body { opacity: 0; animation: fadeIn 0.8s ease forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <!-- Floating CTA Mobile -->
+    <div class="floating-cta">
+        <a href="#pricing" class="btn btn-primary" style="width: 100%;">Start Free Trial <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        🔥 Limited offer: 30% off Pro — Ends Sunday. <a href="#pricing" style="color: white; font-weight: 700; margin-left: 0.5rem;">Claim Offer</a>
+    </div>
+
+    <!-- Sticky Navbar -->
+    <nav id="navbar">
+        <div class="container nav-content">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-bolt-lightning"></i> NEXUS<span>AI</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How it Works</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <a href="#pricing" class="btn btn-primary">Try for Free</a>
+            </div>
+            <div class="mobile-toggle" id="mobileToggle">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-text reveal">
+                <h1>The AI That <span class="gradient-text">Works While You Sleep</span></h1>
+                <p>Automate your entire workflow in under 10 minutes. Connect your tools, set your goal, and let our AI handle the rest. No code required.</p>
+                <div class="hero-btns">
+                    <a href="#pricing" class="btn btn-primary">Start Free Trial <i class="fa-solid fa-arrow-right"></i></a>
+                    <a href="#" class="btn btn-ghost"><i class="fa-solid fa-play"></i> Watch Demo</a>
+                </div>
+                <div class="social-proof">
+                    <p>Trusted by 12,000+ teams at</p>
+                    <div class="social-logos">
+                        <i class="fa-brands fa-google"></i>
+                        <i class="fa-brands fa-meta"></i>
+                        <i class="fa-brands fa-microsoft"></i>
+                        <i class="fa-brands fa-amazon"></i>
+                        <i class="fa-brands fa-slack"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual reveal">
+                <div class="dashboard-mockup">
+                    <div class="mock-nav">
+                        <div class="circle"></div>
+                        <div class="circle"></div>
+                        <div class="circle"></div>
+                    </div>
+                    <div class="mock-sidebar">
+                        <div class="mock-sidebar-icon"></div>
+                        <div class="mock-sidebar-icon"></div>
+                        <div class="mock-sidebar-icon" style="width: 15px;"></div>
+                        <div class="mock-sidebar-icon" style="width: 10px;"></div>
+                    </div>
+                    <div class="mock-main">
+                        <div style="font-size: 0.7rem; font-weight: bold; opacity: 0.5;">ANALYTICS OVERVIEW</div>
+                        <div class="mock-chart">
+                            <div class="mock-line"></div>
+                        </div>
+                        <div class="mock-blocks">
+                            <div class="mock-block"></div>
+                            <div class="mock-block"></div>
+                        </div>
+                        <div class="mock-block" style="height: 40px; margin-top: auto; display: flex; align-items: center; padding: 0 1rem; font-size: 0.6rem; opacity: 0.4;">
+                            <i class="fa-solid fa-sparkles" style="margin-right: 0.5rem; color: #00D4FF;"></i> AI suggests: Optimize workflow #4...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem/Solution Section -->
+    <section class="section-padding reveal">
+        <div class="container">
+            <div class="section-header">
+                <h2>Stop Burning Daylight</h2>
+                <p>Most teams spend 60% of their time on manual tasks. We're here to give you that time back.</p>
+            </div>
+            <div class="dual-columns">
+                <div class="panel">
+                    <h3 style="color: var(--error);">The Old Way</h3>
+                    <div class="point">
+                        <i class="fa-solid fa-xmark"></i>
+                        <p>Hours wasted on data entry and email triage.</p>
+                    </div>
+                    <div class="point">
+                        <i class="fa-solid fa-xmark"></i>
+                        <p>Human error leading to missed opportunities.</p>
+                    </div>
+                    <div class="point">
+                        <i class="fa-solid fa-xmark"></i>
+                        <p>Scaling requires hiring more expensive headcount.</p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3 style="color: var(--success);">The Nexus Way</h3>
+                    <div class="point">
+                        <i class="fa-solid fa-check"></i>
+                        <p>AI handles boring work while you sleep.</p>
+                    </div>
+                    <div class="point">
+                        <i class="fa-solid fa-check"></i>
+                        <p>99.9% accuracy with real-time autonomous decisions.</p>
+                    </div>
+                    <div class="point">
+                        <i class="fa-solid fa-check"></i>
+                        <p>Scales infinitely with zero extra effort.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-padding reveal">
+        <div class="container">
+            <div class="section-header">
+                <h2>Built for the <span class="gradient-text">Modern Workforce</span></h2>
+                <p>Powerful features that help you automate everything from lead gen to customer support.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fa-solid fa-robot"></i>
+                    <h3>AI Automation</h3>
+                    <p>Build complex logic paths that learn and adapt to your specific business needs.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <h3>Real-Time Analytics</h3>
+                    <p>Track every task, every decision, and every cent saved with beautiful visual dashboards.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fa-solid fa-users"></i>
+                    <h3>Team Collaboration</h3>
+                    <p>Bring your whole team into a single environment where automation rules are transparent.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fa-solid fa-plug"></i>
+                    <h3>Integrations (100+)</h3>
+                    <p>Connect with Slack, Notion, Salesforce, GitHub, and everything else in your stack.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <h3>Smart Scheduling</h3>
+                    <p>AI-driven calendar management that finds the perfect time for every meeting.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <h3>Security & Compliance</h3>
+                    <p>Enterprise-grade encryption and GDPR compliance baked into every automated layer.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section id="how-it-works" class="section-padding reveal">
+        <div class="container">
+            <div class="section-header">
+                <h2>Automate in <span class="gradient-text">3 Simple Steps</span></h2>
+                <p>You're less than 10 minutes away from total workflow freedom.</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Connect Your Tools</h3>
+                    <p>Sync your workspace apps in one click with our pre-built secure connectors.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Set Your Workflow</h3>
+                    <p>Describe your goal in plain English—our AI will build the logic for you.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Let AI Handle It</h3>
+                    <p>Sit back and watch as NexusAI executes your tasks with perfect accuracy.</p>
+                </div>
+            </div>
+
+            <!-- Metrics Bar -->
+            <div class="metrics">
+                <div class="metric">
+                    <span class="metric-value counter" data-target="12000">0</span>
+                    <span class="metric-label">Happy Users</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value counter" data-target="98">0</span>
+                    <span class="metric-label">Satisfaction %</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value counter" data-target="10">0</span>
+                    <span class="metric-label">M+ Tasks Automated</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">4.9★</span>
+                    <span class="metric-label">Rating</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section-padding reveal">
+        <div class="container">
+            <div class="section-header">
+                <h2>Loved by <span class="gradient-text">Operators Everywhere</span></h2>
+            </div>
+            <div class="testimonials">
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="quote">"NexusAI has literally bought us 20 hours a week back. It's the best investment we made this year."</p>
+                    <div class="reviewer">
+                        <div class="avatar">SC</div>
+                        <div class="reviewer-info">
+                            <h4>Sarah Chen</h4>
+                            <span>COO @ TechFlow</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="quote">"The onboarding was seamless. We had our first 'autonomous assistant' running in under 5 minutes."</p>
+                    <div class="reviewer">
+                        <div class="avatar">MK</div>
+                        <div class="reviewer-info">
+                            <h4>Marcus King</h4>
+                            <span>Founder @ ScaleUp</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="quote">"I was skeptical of 'no-code AI' but Nexus actually delivers real business value every single day."</p>
+                    <div class="reviewer">
+                        <div class="avatar">EJ</div>
+                        <div class="reviewer-info">
+                            <h4>Elena James</h4>
+                            <span>VP Product @ GlobalCorp</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section-padding reveal">
+        <div class="container">
+            <div class="section-header">
+                <h2>Simple, <span class="gradient-text">Transparent Pricing</span></h2>
+                <p>Choose the plan that fits your current needs. Upgrade as you scale.</p>
+            </div>
+
+            <div class="pricing-toggle">
+                <span id="monthlyTxt" class="nav-link" style="opacity: 1;">Monthly</span>
+                <div class="pricing-toggle-switch" style="cursor: pointer;" id="toggleSwitch">
+                    <div class="toggle-btn active" id="monthlyBtn">Monthly</div>
+                    <div class="toggle-btn" id="annualBtn">Annual (20% Off)</div>
+                </div>
+            </div>
+
+            <div class="pricing-grid">
+                <!-- Starter -->
+                <div class="price-card">
+                    <div class="price-header">
+                        <h3 class="gradient-text">Starter</h3>
+                        <div class="price-amount">$<span id="starterPrice">29</span><span>/mo</span></div>
+                        <p style="color: var(--text-muted);">For individuals exploring AI.</p>
+                    </div>
+                    <ul class="price-features">
+                        <li><i class="fa-solid fa-check"></i> 1,000 Tasks / Mo</li>
+                        <li><i class="fa-solid fa-check"></i> 5 Core Integrations</li>
+                        <li><i class="fa-solid fa-check"></i> Standard Analytics</li>
+                        <li><i class="fa-solid fa-check"></i> Community Support</li>
+                    </ul>
+                    <a href="#" class="btn btn-ghost" style="width: 100%;">Get Started</a>
+                </div>
+                
+                <!-- Pro -->
+                <div class="price-card featured">
+                    <div class="badge">Most Popular</div>
+                    <div class="price-header">
+                        <h3 class="gradient-text">Professional</h3>
+                        <div class="price-amount">$<span id="proPrice">79</span><span>/mo</span></div>
+                        <p style="color: var(--text-muted); opacity: 0.8;">For teams scaling automation.</p>
+                    </div>
+                    <ul class="price-features">
+                        <li><i class="fa-solid fa-check"></i> 10,000 Tasks / Mo</li>
+                        <li><i class="fa-solid fa-check"></i> Unlimited Integrations</li>
+                        <li><i class="fa-solid fa-check"></i> Advanced AI Logic</li>
+                        <li><i class="fa-solid fa-check"></i> Priority Email Support</li>
+                        <li><i class="fa-solid fa-check"></i> Team Collaboration</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary" style="width: 100%;">Start Free Trial</a>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="price-card">
+                    <div class="price-header">
+                        <h3 class="gradient-text">Enterprise</h3>
+                        <div class="price-amount">Custom</div>
+                        <p style="color: var(--text-muted);">For global organizations.</p>
+                    </div>
+                    <ul class="price-features">
+                        <li><i class="fa-solid fa-check"></i> Unlimited Tasks</li>
+                        <li><i class="fa-solid fa-check"></i> API & Webhook Access</li>
+                        <li><i class="fa-solid fa-check"></i> Custom AI Training</li>
+                        <li><i class="fa-solid fa-check"></i> Dedicated Success Manager</li>
+                        <li><i class="fa-solid fa-check"></i> SOC2 & Compliance Audit</li>
+                    </ul>
+                    <a href="#" class="btn btn-ghost" style="width: 100%;">Contact Sales</a>
+                </div>
+            </div>
+
+            <div class="trust-badges">
+                <div class="trust-badge"><i class="fa-solid fa-lock"></i> SSL Secured</div>
+                <div class="trust-badge"><i class="fa-solid fa-shield-check"></i> GDPR Compliant</div>
+                <div class="trust-badge"><i class="fa-solid fa-certificate"></i> SOC2 Certified</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section-padding reveal">
+        <div class="container">
+            <div class="section-header">
+                <h2>Common Questions</h2>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How does the 14-day free trial work?</h3>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can sign up for the Pro plan without a credit card. You'll get full access to all features for 14 days. If you don't upgrade by the end, your account will be paused.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Is my data secure with NexusAI?</h3>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely. We use AES-256 encryption at rest and TLS 1.3 in transit. We are SOC2 Type II certified and GDPR compliant. Your data is used ONLY to run your workflows.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Do I need to know how to code?</h3>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Not at all. NexusAI is designed for business operators. You can build complex automation rules using natural language and our visual drag-and-drop interface.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How many integrations do you support?</h3>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We support over 100+ native integrations including Slack, Salesforce, Notion, HubSpot, GitHub, and Jira. We also have a robust API for custom connections.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Can I cancel my subscription anytime?</h3>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, there are no long-term contracts. You can cancel, upgrade, or downgrade your plan at any time through your dashboard.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What kind of support do you offer?</h3>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Starter users get access to our community forums. Pro users get priority email support, and Enterprise customers receive a dedicated Slack channel and account manager.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Banner -->
+    <section class="section-padding reveal">
+        <div class="container">
+            <div class="cta-banner">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.4), transparent 50%); z-index: 0;"></div>
+                <div style="position: relative; z-index: 1;">
+                    <h2>Ready to 10x your productivity?</h2>
+                    <p>Join 12,000+ teams already using NexusAI to automate the mundane and focus on what matters.</p>
+                    <a href="#pricing" class="btn btn-primary">Start Your Free Trial <i class="fa-solid fa-arrow-right"></i></a>
+                    <span class="microcopy">No credit card required. Cancel anytime.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <a href="#" class="logo footer-logo">
+                    <i class="fa-solid fa-bolt-lightning"></i> NEXUS<span>AI</span>
+                </a>
+                <p class="footer-logo-text">The world's most advanced autonomous workflow engine for modern teams.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="#"><i class="fa-brands fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how-it-works">How it Works</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#">Integrations</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookies</a></li>
+                    <li><a href="#">Security</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 NexusAI Technologies Inc. All rights reserved.</p>
+            <div style="display: flex; gap: 2rem;">
+                <a href="#" style="color: inherit; text-decoration: none;">Privacy</a>
+                <a href="#" style="color: inherit; text-decoration: none;">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script shadow>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navLinks = document.getElementById('navLinks');
+        mobileToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Close nav on click
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Reveal animations on scroll
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // FAQ Accordion
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+                if (!isActive) item.classList.add('active');
+            });
+        });
+
+        // Pricing Toggle
+        const toggleBtn = document.getElementById('toggleSwitch');
+        const monthlyBtn = document.getElementById('monthlyBtn');
+        const annualBtn = document.getElementById('annualBtn');
+        const starterPrice = document.getElementById('starterPrice');
+        const proPrice = document.getElementById('proPrice');
+
+        toggleBtn.addEventListener('click', () => {
+            const isAnnual = annualBtn.classList.toggle('active');
+            monthlyBtn.classList.toggle('active');
+            
+            if (isAnnual) {
+                // 20% off annual: Starter 29 -> 23.2, Pro 79 -> 63.2 (rounded)
+                starterPrice.innerText = '23';
+                proPrice.innerText = '63';
+            } else {
+                starterPrice.innerText = '29';
+                proPrice.innerText = '79';
+            }
+        });
+
+        // Counter animation
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = parseInt(entry.target.getAttribute('data-target'));
+                    let count = 0;
+                    const speed = 2000 / target;
+                    const updateCount = () => {
+                        const increment = target / 50;
+                        if (count < target) {
+                            count += increment;
+                            entry.target.innerText = Math.ceil(count).toLocaleString() + (target === 98 ? '%' : '+');
+                            setTimeout(updateCount, 30);
+                        } else {
+                            entry.target.innerText = target.toLocaleString() + (target === 98 ? '%' : '+');
+                        }
+                    };
+                    updateCount();
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        });
+
+        document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+
+        // Smooth scrolling for all anchors
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
